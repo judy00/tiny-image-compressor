@@ -1,0 +1,157 @@
+const { app, BrowserWindow, ipcMain, dialog, nativeImage } = require('electron');
+const path = require('path');
+const fs = require('fs');
+const sharp = require('sharp');
+
+let mainWindow;
+let iconWindow;
+
+async function createIconWindow() {
+    iconWindow = new BrowserWindow({
+        width: 256,
+        height: 256,
+        frame: false,
+        transparent: true,
+        skipTaskbar: true,
+        show: false,
+    });
+
+    await iconWindow.loadFile('icon.html');
+    const buffer = await iconWindow.webContents.capturePage();
+    const icon = nativeImage.createFromBuffer(buffer.toPNG());
+    iconWindow.destroy();
+    return icon;
+}
+
+async function createWindow() {
+    const icon = await createIconWindow();
+
+    // 設定 dock 圖示 (macOS)
+    if (process.platform === 'darwin') {
+        app.dock.setIcon(icon);
+    }
+
+    mainWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        },
+        icon: icon
+    });
+
+    mainWindow.loadFile('index.html');
+}
+
+app.whenReady().then(createWindow);
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
+});
+
+app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+    }
+});
+
+ipcMain.handle('select-files', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+        properties: ['openFile', 'multiSelections'],
+        filters: [
+            { name: 'Images', extensions: ['jpg', 'jpeg', 'png'] }
+        ]
+    });
+    return result.filePaths;
+});
+
+async function processImage(filePath, outputPath, width) {
+    const fileName = path.basename(filePath);
+    const outputFilePath = path.join(outputPath, `${path.parse(fileName).name}.webp`);
+
+    await sharp(filePath)
+        .resize(width, null, {
+            fit: 'inside',
+            withoutEnlargement: true,
+            kernel: 'lanczos3'
+        })
+        .webp({
+            quality: 100
+        })
+        .toFile(outputFilePath);
+
+    return outputFilePath;
+}
+
+// 處理電腦版圖片
+ipcMain.handle('process-desktop-images', async (event, files) => {
+    const results = [];
+
+    for (const filePath of files) {
+        try {
+            const dirPath = path.dirname(filePath);
+            const fileName = path.basename(filePath);
+
+            // 建立電腦版輸出目錄
+            const outputPath = path.join(dirPath, '電腦版壓縮圖');
+            if (!fs.existsSync(outputPath)) {
+                fs.mkdirSync(outputPath, { recursive: true });
+            }
+
+            // 處理電腦版圖片 (1000px)
+            const outputFilePath = await processImage(filePath, outputPath, 1000);
+
+            results.push({
+                success: true,
+                file: fileName,
+                outputPath: outputFilePath
+            });
+        } catch (error) {
+            results.push({
+                success: false,
+                file: path.basename(filePath),
+                error: error.message
+            });
+        }
+    }
+
+    return results;
+});
+
+// 處理手機版圖片
+ipcMain.handle('process-mobile-images', async (event, files) => {
+    const results = [];
+
+    for (const filePath of files) {
+        try {
+            const dirPath = path.dirname(filePath);
+            const fileName = path.basename(filePath);
+
+            // 建立手機版輸出目錄
+            const outputPath = path.join(dirPath, '手機版壓縮圖');
+            if (!fs.existsSync(outputPath)) {
+                fs.mkdirSync(outputPath, { recursive: true });
+            }
+
+            // 處理手機版圖片 (700px)
+            const outputFilePath = await processImage(filePath, outputPath, 700);
+
+            results.push({
+                success: true,
+                file: fileName,
+                outputPath: outputFilePath
+            });
+        } catch (error) {
+            results.push({
+                success: false,
+                file: path.basename(filePath),
+                error: error.message
+            });
+        }
+    }
+
+    return results;
+});
