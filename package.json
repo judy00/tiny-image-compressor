@@ -13,21 +13,27 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "electron": "^28.0.0",
-    "electron-builder": "^24.9.1",
     "sharp": "^0.32.6"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
   },
   "build": {
     "appId": "com.tiny-image-compressor.app",
     "productName": "Tiny Image Compressor",
+    "icon": "assets/icons/512.png",
     "mac": {
-      "category": "public.app-category.utilities"
+      "category": "public.app-category.utilities",
+      "icon": "assets/icons/512.png"
     },
     "win": {
-      "target": ["nsis"]
+      "target": ["nsis"],
+      "icon": "assets/icons/512.png"
     },
     "linux": {
-      "target": ["AppImage", "deb"]
+      "target": ["AppImage", "deb"],
+      "icon": "assets/icons/512.png"
     }
   }
 }

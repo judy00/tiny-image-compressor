@@ -1,44 +1,18 @@
-const { app, BrowserWindow, ipcMain, dialog, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const sharp = require('sharp');
 
 let mainWindow;
-let iconWindow;
-
-async function createIconWindow() {
-    iconWindow = new BrowserWindow({
-        width: 256,
-        height: 256,
-        frame: false,
-        transparent: true,
-        skipTaskbar: true,
-        show: false,
-    });
-
-    await iconWindow.loadFile('icon.html');
-    const buffer = await iconWindow.webContents.capturePage();
-    const icon = nativeImage.createFromBuffer(buffer.toPNG());
-    iconWindow.destroy();
-    return icon;
-}
 
 async function createWindow() {
-    const icon = await createIconWindow();
-
-    // 設定 dock 圖示 (macOS)
-    if (process.platform === 'darwin') {
-        app.dock.setIcon(icon);
-    }
-
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
-        },
-        icon: icon
+        }
     });
 
     mainWindow.loadFile('index.html');
