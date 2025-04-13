@@ -33,13 +33,6 @@
             text-align: center;
         }
 
-        .subtitle {
-            color: #666;
-            text-align: center;
-            margin-bottom: 32px;
-            font-size: 14px;
-        }
-
         .features {
             color: #666;
             text-align: center;
@@ -108,13 +101,6 @@
             cursor: not-allowed;
         }
 
-        .button-hint {
-            font-size: 13px;
-            color: #868e96;
-            text-align: center;
-            margin: 8px 0 24px;
-        }
-
         #fileList {
             margin: 0 auto;
             max-width: 800px;
@@ -180,18 +166,16 @@
 <body>
     <div class="container">
         <h1>圖片批次處理工具</h1>
-        <div class="subtitle">支援格式：JPG、JPEG、PNG</div>
         <div class="features">
-            🖥️ 電腦版：寬度 1000px，存放於「電腦版壓縮圖」資料夾<br>
-            📱 手機版：寬度 700px，存放於「手機版壓縮圖」資料夾<br>
-            🎨 輸出格式：WebP
+            支援格式：JPG、JPEG、PNG<br>
+            電腦版：寬度 1000px，存放於「電腦版壓縮圖」資料夾<br>
+            手機版：寬度 700px，存放於「手機版壓縮圖」資料夾<br>
         </div>
         <div class="button-group">
             <button id="selectFiles" class="button select">選擇圖片</button>
             <button id="processDesktop" class="button desktop" disabled>壓縮電腦版圖片</button>
             <button id="processMobile" class="button mobile" disabled>壓縮手機版圖片</button>
         </div>
-        <div class="button-hint">可選擇多個 JPG、JPEG 或 PNG 檔案</div>
         <div id="fileList"></div>
         <div id="progress"></div>
     </div>
