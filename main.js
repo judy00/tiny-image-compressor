@@ -53,7 +53,9 @@ async function processImage(filePath, outputPath, width) {
             kernel: 'lanczos3'
         })
         .webp({
-            quality: 100
+            quality: 100,
+            effort: 6,
+            lossless: false
         })
         .toFile(outputFilePath);
 
